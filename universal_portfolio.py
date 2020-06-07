@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 from datetime import date, datetime
 from typing import List
 
@@ -23,7 +24,7 @@ class UniversalPortfolio(StocksDataFrame):
                 else:
                     b = sum((weights.T * current_day).T) / np.sum(current_day)
                 trend.append(sum(b * r))
-                current_day = day # to align ratios and days arrays
+                current_day = day
                 i_trend += 1
             trend = ratioanl_array_recursively(trend)
 
@@ -73,4 +74,6 @@ if __name__ == '__main__':
     trend = universal[:, 1]
     dates = universal[:, 0]
     plt.plot_date(dates, trend)
+    plt.title(f'Trend for stocks: {upo.stocks}')
+    plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
     plt.show()

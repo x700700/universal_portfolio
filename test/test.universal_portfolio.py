@@ -3,6 +3,7 @@ import json
 from datetime import date
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 
 from helpers import build_debugable_diff_table
 from universal_portfolio import UniversalPortfolio
@@ -54,6 +55,8 @@ class TestPortfolio(unittest.TestCase):
 
         dates = universal[:,0]
         plt.plot_date(dates, trend)
+        plt.title(f'Trend for stocks: {self.universal_portolio.stocks}')
+        plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
         plt.show()
         print("Universal Portfolio result matches expected.")
 

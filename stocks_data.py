@@ -9,6 +9,7 @@ RELEVANT_STOCK_DAILY_STATUS = "Adj Close"
 
 class StocksDataFrame:
     yahoo_df = None
+    stocks = []
     stocks_count = 0
 
     @property
@@ -50,8 +51,8 @@ class StocksDataFrame:
 
         columns = self.yahoo_df.columns
         col_vendor = columns.get_level_values(1)
-        stocks = list(filter(None, set(col_vendor)))
-        print(f"Data Frame stocks - {stocks}")
+        self.stocks = list(filter(None, set(col_vendor)))
+        print(f"Data Frame stocks - {self.stocks}")
 
         col_status = columns.get_level_values(0)
         statuses = list(filter(lambda x: x != 'Date', set(col_status)))
