@@ -2,8 +2,6 @@ import unittest
 import json
 from datetime import date
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mtick
 
 from helpers import build_debugable_diff_table
 from universal_portfolio import UniversalPortfolio
@@ -44,21 +42,19 @@ class TestPortfolio(unittest.TestCase):
     def test_02_universal_portfolio_result(self):
         try:
             universal = self.universal_portolio.calculate_universal_portfolio(10)
-            trend = universal[:, 1]
         except Exception as err:
             self.assertTrue(False, f"Error - Algo crashed - {err}")
 
         with open('./universal_portfolio.json') as json_file:
             expected = json.load(json_file)
+        trend = universal[:, 1]
         comparison_table_for_debug = build_debugable_diff_table(trend, expected)
         np.testing.assert_almost_equal(trend, expected, 5)
-
-        dates = universal[:,0]
-        plt.plot_date(dates, trend)
-        plt.title(f'Trend for stocks: {self.universal_portolio.stocks}')
-        plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-        plt.show()
         print("Universal Portfolio result matches expected.")
+
+        plt = self.universal_portolio.get_plot(universal)
+        plt.show()
+
 
 if __name__ == '__main__':
     unittest.main()

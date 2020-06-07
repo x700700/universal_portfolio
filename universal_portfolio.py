@@ -34,6 +34,15 @@ class UniversalPortfolio(StocksDataFrame):
         except Exception as err:
             raise Exception(f"Error during porfolio calculations - {err}")
 
+    def get_plot(self, universal):
+        trend = universal[:, 1]
+        dates = universal[:, 0]
+        plt.plot_date(dates, trend, linestyle='-', markersize=0.0)
+        plt.title(f'Trend for stocks: {self.stocks}')
+        plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
+        plt.gca().xaxis.set_major_locator(plt.MaxNLocator(7))
+        return plt
+
     # ==================================================================================================
     # helpers functions:
     # ==================================================================================================
@@ -68,12 +77,12 @@ class UniversalPortfolio(StocksDataFrame):
 
 if __name__ == '__main__':
     upo = UniversalPortfolio()
-    df = upo.fetch_stocks_daily_data(["GOOG", "AAPL", "MSFT"], date(2018, 1, 1), date(2019, 12, 31))
+    start_date = date(2018, 1, 1)
+    end_date = date(2020, 5, 31)
+    tickers = ["GOOG", "AAPL", "MSFT", "AMZN", "FB"]
+    n = 2
+    df = upo.fetch_stocks_daily_data(tickers, start_date, end_date)
     print(df.head())
-    universal = upo.calculate_universal_portfolio(10)
-    trend = universal[:, 1]
-    dates = universal[:, 0]
-    plt.plot_date(dates, trend)
-    plt.title(f'Trend for stocks: {upo.stocks}')
-    plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
+    universal = upo.calculate_universal_portfolio(2)
+    plt = upo.get_plot(universal)
     plt.show()
