@@ -52,7 +52,7 @@ class TestPortfolio(unittest.TestCase):
         np.testing.assert_almost_equal(trend, expected, 5)
         print("Universal Portfolio result matches expected.")
 
-        plt = self.universal_portolio.get_plot(universal)
+        plt = self.universal_portolio.get_plot()
         plt.show()
 
 

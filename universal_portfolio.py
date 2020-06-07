@@ -7,7 +7,12 @@ from typing import List
 from helpers import ratioanl_array_recursively
 from stocks_data import StocksDataFrame
 
+PLT_X_AXIS_DATES_NUM = 6
+
 class UniversalPortfolio(StocksDataFrame):
+    universal = None
+    plt = None
+
     def calculate_universal_portfolio(self, portfolio_quantization: int = 20) -> List[float]:
         self._validate_universal_parms(portfolio_quantization)
         try:
@@ -29,19 +34,27 @@ class UniversalPortfolio(StocksDataFrame):
             trend = ratioanl_array_recursively(trend)
 
             dates = [datetime.utcfromtimestamp(x.tolist()/1e9) for x in np.array(self.yahoo_df.index, dtype=np.datetime64)]
-            trend = np.vstack((dates, trend)).T
-            return trend
+            self.universal = np.vstack((dates, trend)).T
+            return self.universal
         except Exception as err:
             raise Exception(f"Error during porfolio calculations - {err}")
 
-    def get_plot(self, universal):
-        trend = universal[:, 1]
-        dates = universal[:, 0]
+    def get_plot(self):
+        if self.universal is None:
+            raise Exception("Universal portfolio was not calculated. Call calculate_universal_portfolio() first.")
+        trend = self.universal[:, 1]
+        dates = self.universal[:, 0]
         plt.plot_date(dates, trend, linestyle='-', markersize=0.0)
         plt.title(f'Trend for stocks: {self.stocks}')
-        plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-        plt.gca().xaxis.set_major_locator(plt.MaxNLocator(7))
-        return plt
+        ax = plt.gca()
+        ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
+        ax.xaxis.set_major_locator(plt.MaxNLocator(PLT_X_AXIS_DATES_NUM))
+        # No good, distort the x axis
+        # x_dates = ax.get_xticks()[0:PLT_X_AXIS_DATES_NUM]
+        # x_dates[-1] = dates[-1].toordinal()
+        # ax.set_xticks(x_dates)
+        self.plt = plt
+        return self.plt
 
     # ==================================================================================================
     # helpers functions:
@@ -78,11 +91,11 @@ class UniversalPortfolio(StocksDataFrame):
 if __name__ == '__main__':
     upo = UniversalPortfolio()
     start_date = date(2018, 1, 1)
-    end_date = date(2020, 5, 31)
+    end_date = date(2020, 6, 30)
     tickers = ["GOOG", "AAPL", "MSFT", "AMZN", "FB"]
     n = 2
     df = upo.fetch_stocks_daily_data(tickers, start_date, end_date)
-    print(df.head())
+    # print(df.head())
     universal = upo.calculate_universal_portfolio(2)
-    plt = upo.get_plot(universal)
+    plt = upo.get_plot()
     plt.show()
