@@ -1,11 +1,13 @@
 import numpy as np
+from datetime import date
+from typing import List
+
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
-from datetime import date, datetime
-from typing import List
 
 from helpers import ratioanl_array_recursively
 from stocks_data import StocksDataFrame
+
 
 PLT_X_AXIS_DATES_NUM = 6
 
@@ -32,9 +34,7 @@ class UniversalPortfolio(StocksDataFrame):
                 current_day = day
                 i_trend += 1
             trend = ratioanl_array_recursively(trend)
-
-            dates = [datetime.utcfromtimestamp(x.tolist()/1e9) for x in np.array(self.yahoo_df.index, dtype=np.datetime64)]
-            self.universal = np.vstack((dates, trend)).T
+            self.universal = np.vstack((self.dates, trend)).T
             return self.universal
         except Exception as err:
             raise Exception(f"Error during porfolio calculations - {err}")
@@ -49,7 +49,7 @@ class UniversalPortfolio(StocksDataFrame):
         ax = plt.gca()
         ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
         ax.xaxis.set_major_locator(plt.MaxNLocator(PLT_X_AXIS_DATES_NUM))
-        # No good, distort the x axis
+        # No good, distort the x axis:
         # x_dates = ax.get_xticks()[0:PLT_X_AXIS_DATES_NUM]
         # x_dates[-1] = dates[-1].toordinal()
         # ax.set_xticks(x_dates)
@@ -61,14 +61,14 @@ class UniversalPortfolio(StocksDataFrame):
     # ==================================================================================================
 
     def _validate_universal_parms(self, portfolio_quantization: int):
+        if portfolio_quantization < 1 or portfolio_quantization > 100:
+            raise Exception("Error - portfolio_quantization must be between 1-100")
         if not self.isValid:
             raise Exception("Error - benchmark data is invalid")
-        if len(self.yahoo_df) == 0:
-            raise Exception("Error - benchmark data is empty")
-        if portfolio_quantization < 1 or portfolio_quantization > 100:
-            raise Exception("Error - quant must be between 1-100")
         if len(self.yahoo_df.columns) == 0:
             raise Exception("Error - stocks table is empty")
+        if len(self.yahoo_df) == 0:
+            raise Exception("Error - benchmark data is empty")
 
     def _calculate_weights(self, quant: int):
         # Build weights array
@@ -77,7 +77,7 @@ class UniversalPortfolio(StocksDataFrame):
         #
         indices = np.indices([quant+1 for _ in range(self.stocks_count)])
         chosen_indices = indices.sum(axis=0) == quant
-        weights = (indices[:, chosen_indices].T) / quant
+        weights = indices[:, chosen_indices].T / quant
         weights_even = np.ones(self.stocks_count) / self.stocks_count
         return (weights, weights_even)
 
@@ -89,13 +89,14 @@ class UniversalPortfolio(StocksDataFrame):
 
 
 if __name__ == '__main__':
-    upo = UniversalPortfolio()
     start_date = date(2018, 1, 1)
     end_date = date(2020, 6, 30)
     tickers = ["GOOG", "AAPL", "MSFT", "AMZN", "FB"]
     n = 2
+
+    upo = UniversalPortfolio()
     df = upo.fetch_stocks_daily_data(tickers, start_date, end_date)
     # print(df.head())
-    universal = upo.calculate_universal_portfolio(2)
+    universal = upo.calculate_universal_portfolio(n)
     plt = upo.get_plot()
     plt.show()

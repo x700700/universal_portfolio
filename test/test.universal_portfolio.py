@@ -6,6 +6,7 @@ import numpy as np
 from helpers import build_debugable_diff_table
 from universal_portfolio import UniversalPortfolio
 
+
 class TestPortfolio(unittest.TestCase):
     universal_portolio = UniversalPortfolio()
 
@@ -43,7 +44,7 @@ class TestPortfolio(unittest.TestCase):
         try:
             universal = self.universal_portolio.calculate_universal_portfolio(10)
         except Exception as err:
-            self.assertTrue(False, f"Error - Algo crashed - {err}")
+            self.assertTrue(False, f"Error - Algo Error - {err}")
 
         with open('./universal_portfolio.json') as json_file:
             expected = json.load(json_file)
